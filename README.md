@@ -40,6 +40,7 @@ cleanup compatibility.
 | Component | What it does |
 |---|---|
 | [Quiet Home source](launcher/src/Home.cs) | Native .NET/NUI home, HDMI cards, app library and quick settings |
+| [Live S90F setup](s90f/AGENTS.md) | Verified S90F launcher, boot hook, remote key rebinds, tools and recovery |
 | [App catalog](launcher/assets/apps.json) | Example shortcuts for Netflix, YouTube, Prime Video, HBO Max, Disney+, Hulu, Spotify, Apple TV, Tubi, Luna and Xbox |
 | [Artwork tools](docs/06-artwork.md) | Vector/high-resolution artwork sources, optional local downloads and retained image views |
 | [Cleanup profile](profiles/un75u8000ffxza-1300.9.json) | Separately selectable advertising, voice, context, smart-extras, sidebar and TV Plus groups |
@@ -73,16 +74,20 @@ Root access is reacquired from the computer when maintenance requires it.
 A temporary SDB/archive-launcher root session was also demonstrated on a
 Samsung `QN55S90FAFXZA`, firmware `T-RSMFAKUC-0090-1301.0` (Linux 5.4.261,
 aarch64, .NET 6.0.9). The TV authenticated the temporary agent as UID/EUID 0.
-This confirms that the archive route is possible on this exact reported
-build; it does not qualify the U8000F cleanup profile, a launcher installation,
-or other S90F firmware. Full reboot/standby and restoration validation were
-not part of this root-route report. See the [sanitized S90F evidence](evidence/s90f-root.json).
+That TV now runs a complete, verified Quiet Home setup: the launcher, an
+AT-HUB boot hook that reapplies the TizenTube SMACK rules, early Home
+activation and four remote key rebinds. A full unplug, standby wake and all
+four physical buttons were verified on 2026-10-27. Its sanitized source, boot
+payloads, deploy tools and agent handoff are in [s90f/](s90f/); start with
+[s90f/AGENTS.md](s90f/AGENTS.md). The original root-route evidence remains at
+[evidence/s90f-root.json](evidence/s90f-root.json).
 
 On the U8000F, the native launcher and underlying techniques were exercised
 on the TV. The **generalized scripts in this public release were checked
 locally and compiled where applicable; they have not been replayed
-end-to-end on a second TV**. The S90F result above is limited to temporary
-root access; it does not validate those scripts there.
+end-to-end on a second TV**. The S90F setup is a separate profile with its
+own source and tools; it does not validate the U8000F cleanup profile on
+other hardware.
 
 ## Walkthrough
 
