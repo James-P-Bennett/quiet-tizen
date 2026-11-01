@@ -19,11 +19,12 @@ the recovery steps. Read [AGENTS.md](AGENTS.md) before changing the TV.
 ## Current result
 
 - Quiet Home is `com.samsung.tv.AICompanionUI`, assembly hash
-  `715edef7...`, and rebuilds byte-identical from `launcher/`.
-- Prime opens Spotify, YouTube opens TizenTube, TV Plus opens Jellyfin and
-  Netflix stays Netflix. All four were verified after a full unplug.
-- The AT-HUB hook reapplies both TizenTube SMACK rules at every boot, starts
-  the remote proxy and forces an early Home resume.
+  `d8c93de9...`, and rebuilds byte-identical from `launcher/`.
+- Prime opens Spotify, YouTube opens Samsung's own YouTube app, TV Plus opens
+  Jellyfin and Netflix stays Netflix. All four were verified after a full unplug.
+- The AT-HUB hook starts the remote proxy and forces an early Home resume. Its
+  old TizenTube SMACK lines were removed on 2026-11-01 when TizenTube was
+  uninstalled.
 - The menu appears about 11 to 12 seconds after the Samsung logo on a hard
   boot. Standby wake is immediate.
 

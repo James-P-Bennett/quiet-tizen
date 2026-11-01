@@ -939,7 +939,7 @@ def main() -> None:
             result = authenticated_root_command(
                 args.host, model, args.callback_host,
                 root_script_command(script, (name, stage_dir, package_hash,
-                    "715edef76d5915194019375ab5f700353a828a7b2de10e6d421a778cbbbbdac3", assembly_hash)),
+                    "d8c93de9021fb2843c40a25b6f29718711fe34b7eb5834acf31998e6ed97e6ac", assembly_hash)),
                 log, timeout=120)
             print(result["commands"][0]["stdout"], end="")
         finally:

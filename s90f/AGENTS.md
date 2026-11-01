@@ -34,14 +34,14 @@ installer. Read this file before changing anything.
 
 - Quiet Home is installed as `com.samsung.tv.AICompanionUI`. The installed
   assembly hash is
-  `715edef76d5915194019375ab5f700353a828a7b2de10e6d421a778cbbbbdac3`.
+  `d8c93de9021fb2843c40a25b6f29718711fe34b7eb5834acf31998e6ed97e6ac`.
   The source in `launcher/` rebuilds byte-identical to that hash with the
   portable project file.
 - `db/appfw/home_appid` is `com.samsung.tv.AICompanionUI`.
 - CP key slots: slot 1 `3201907018807` (Netflix), slot 2 `3201606009684`
   (Spotify), slot 3 `111299001912` (YouTube store app).
-- Physical buttons: Prime opens Spotify, YouTube opens TizenTube, TV Plus
-  opens Jellyfin, Netflix opens Netflix.
+- Physical buttons: Prime opens Spotify, YouTube opens Samsung's own YouTube
+  app, TV Plus opens Jellyfin, Netflix opens Netflix.
 - The AT-HUB boot hook runs the original parseinfo, sets NTP timeservers,
   writes both TizenTube SMACK rules, starts the remote proxy and starts the
   early Home activation.
@@ -241,6 +241,18 @@ page and a delayed fireplace. They are order-dependent.
    the clock. `OnPause` pauses the video and stops the clock.
 10. Startup is complete in about 3 seconds on the verified build; the menu
     timing after boot is dominated by when the system resumes the app.
+11. The video watchdog calls `Play()` every 5 minutes while the app is resumed,
+    the backdrop exists and the fireplace timer has not expired. It exists
+    because the media pipeline can wedge at 0 percent decode while
+    `muse-server` still holds `fireplace.mp4` open; only a `Play()` or an app
+    restart clears it. It stops calling after three calls that each block for
+    5 seconds or more, so a permanently broken pipeline cannot turn into a
+    repeating freeze.
+12. `OnResume` logs `onresume t base|raise|play|source|settings` in
+    milliseconds. Use those to locate a slow resume instead of guessing. On
+    the observed build a resume after a long idle can take about 20 seconds
+    while a resume in quick succession takes under one second; that tracks
+    memory pressure and swap, so check `MemAvailable` and `SwapFree` first.
 
 Diagnostic evidence is written to `/tmp/quiet-home-video.txt`. Useful markers:
 `oncreate start`, `oncreate page`, `created`, `onresume start/done`,
@@ -257,8 +269,57 @@ Slot 2 is the Prime Video slot; it now contains Spotify's store ID.
 |---|---|---|
 | Prime Video | CP slot 2 | Spotify |
 | Netflix | CP slot 1 | Netflix |
-| YouTube | remote proxy consumes kernel keycode 529 | `xvvl3S1TT1.TizenTubeStandalone` |
+| YouTube | remote proxy consumes kernel keycode 529 | `9Ur5IzDKqV.TizenYouTube` |
 | Samsung TV Plus | remote proxy consumes kernel keycode 560 | `rTn6ClEurC.Jellyfin` |
+
+### YouTube: stock app only
+
+TizenTube (`xvvl3S1TT1`) was uninstalled on 2026-11-01, and its SMACK lines
+were removed from the boot launch the same day. YouTube opens Samsung's own
+app (`9Ur5IzDKqV.TizenYouTube`) from both the catalog and the remote proxy.
+There is no in app SponsorBlock, no DeArrow and no ad blocking; the owner chose
+stock over a custom client, so do not reintroduce one without being asked.
+
+An iSponsorBlockTV trial was set up on the homelab and then removed at the
+owner's request, including the container, the image and the data directory.
+
+The removed package was copied to
+`/opt/usr/share/quiet-tizen-backups/tizentube-2.1.3/app`. That copy is not
+installable as is; restoring TizenTube means rebuilding it and signing with a
+Partner certificate.
+
+### Memory trim (persistent, applied 2026-11-01)
+
+The TV has 1.9 GB of RAM and a 1.24 GB zram swap. After five days of uptime
+swap was about 93 percent full. The owner's rule for this work: every change
+must survive a reboot on its own, so nothing here relies on a manual cleanup.
+
+Three mechanisms, all self restoring:
+
+1. **Service stop markers.** Vendor units carry a negated
+   `ConditionPathExists`. Creating the file makes systemd refuse to start the
+   unit forever. In place: `/opt/usr/share/systemd/system/slive-provider-daemon`
+   for TV Plus and `/opt/usr/share/systemd/system/bms` for its BMS service.
+   Verified with `systemctl start`, which leaves `ConditionResult=no` and
+   `ActiveState=inactive`. Remove the file to undo.
+2. **Runtime masks reapplied at boot.** `contents-recognition-service`,
+   `org.tizen.tv.sp-kpi`, `data-service` and `ipa` have no stop-file condition
+   and their unit files are not writable, so the boot launch runs
+   `systemctl mask --runtime --now` on all four every boot. Look for the
+   `mask:` lines in `runs.log`.
+3. **Preload flags.** `db/was/preload_by_country` is false and the cached copy
+   in `/opt/dbspace/.webappservice.db` `WASConfigTable` `RESERVED_18`
+   `$.rsp.preloadByCountry` is false. Samsung catalog refreshes have restored
+   these before, so recheck after a firmware or catalog update.
+
+Closing preloaded apps with `app_launcher -u 5001 -r` does **not** work on this
+build: most return "not available for the user 5001", and the ones that accept
+the request are running again seconds later. Do not rely on it and do not build
+a periodic killer around it.
+
+The zram device is the swap: `/sys/block/zram0/mm_stat` reports compressed size
+and real RAM used. A full swap is not by itself a fault; check
+`MemAvailable` and whether anything actually stalls.
 
 The proxy is `/opt/usr/share/quiet-smack-boot/remote-proxy/remote-proxy.dll`.
 It creates a uinput device named `Smart Control`, grabs `/dev/input/event3`

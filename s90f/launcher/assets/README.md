@@ -12,7 +12,7 @@ media, publisher artwork and personal configuration stay in `.local/`.
 | `fireplace.json` | Home/fire volume, fade time and hold time |
 | `video-mode.txt` | `underlay` on this TV |
 | `extra/lucide-*.svg` | Settings and quick-control icons, ISC license |
-| `../apps.json` | Live app catalog: Jellyfin, TizenTube, RetroArch, Spotify, Netflix |
+| `../apps.json` | Live app catalog: Jellyfin, YouTube, RetroArch, Spotify, Netflix |
 | `weather.json.example` | Shape of the weather configuration; replace the coordinates on the TV only |
 
 The fonts are reused from `launcher/assets/fonts/` in the main repository.

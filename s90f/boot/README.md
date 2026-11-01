@@ -1,7 +1,8 @@
 # AT-HUB boot payload
 
-The boot hook makes the TV reapply the TizenTube SMACK rules, start the
-remote key proxy and activate Home early at every boot. It runs from
+The boot hook starts the remote key proxy and activates Home early at every
+boot. The TizenTube SMACK lines it used to write were removed on 2026-11-01
+when TizenTube was uninstalled. It runs from
 `AT-HUB.service` through a gawk shebang wrapper installed over
 `/opt/etc/parseinfo.sh`.
 

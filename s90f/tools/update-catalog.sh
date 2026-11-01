@@ -44,7 +44,7 @@ vconftool get db/appfw/home_appid >> "$D/routing-before.txt"
 mkdir "$P"
 tar -xzf "$stage/package-s90f.tar.gz" -C "$P"
 test -s "$P/quiet-home/apps.json"
-for app in org.tizen.netflix-app xvvl3S1TT1.TizenTubeStandalone rTn6ClEurC.Jellyfin RtArchTzn0.RetroArch rJeHak5zRg.Spotify; do
+for app in org.tizen.netflix-app 9Ur5IzDKqV.TizenYouTube rTn6ClEurC.Jellyfin RtArchTzn0.RetroArch rJeHak5zRg.Spotify; do
     grep -q "\"Id\": \"$app\"" "$P/quiet-home/apps.json"
 done
 
@@ -52,7 +52,7 @@ mutating=1
 cp "$P/quiet-home/apps.json" "$R/apps.json.new"
 fix "$R/apps.json.new"
 mv "$R/apps.json.new" "$R/apps.json"
-grep -q TizenTubeStandalone "$R/apps.json"
+grep -q 9Ur5IzDKqV.TizenYouTube "$R/apps.json"
 app_launcher -u 5001 -k "$APP" || true
 app_launcher -u 5001 -s "$APP"
 mutating=0

@@ -8,8 +8,8 @@ They are built from source, not copied from the TV.
 The always-on interceptor approved by the owner. It creates a uinput device
 named `Smart Control`, grabs the live Smart Control and Remote-Input
 keyboards, forwards every event and consumes only kernel keycode 529
-(YouTube, launches TizenTube) and 560 (TV Plus, launches Jellyfin). Apps are
-started with `/usr/bin/app_launcher --user 5001 -s`.
+(YouTube, launches `9Ur5IzDKqV.TizenYouTube`) and 560 (TV Plus, launches
+Jellyfin). Apps are started with `/usr/bin/app_launcher --user 5001 -s`.
 
 Deployed files: `remote-proxy.dll`, `remote-proxy.deps.json` and
 `remote-proxy.runtimeconfig.json` in

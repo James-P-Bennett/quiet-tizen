@@ -16,6 +16,12 @@ public sealed class QuietHome : NUIApplication
 {
 	private VideoView backdropVideo;
 
+	private Timer videoWatchdog;
+
+	private bool resumed;
+
+	private int videoWatchdogHangs;
+
 	private View dimOverlay;
 
 	private bool fireplace;
@@ -362,23 +368,71 @@ public sealed class QuietHome : NUIApplication
 		startupRaiseTimer.Start();
 		try { Window.Default.Raise(); Window.Default.Activate(); } catch { }
 		BuildFireHints();
+		StartVideoWatchdog();
 		WriteState("created");
 		VideoLog("created");
+	}
+
+	private void StartVideoWatchdog()
+	{
+		videoWatchdog = new Timer(300000u);
+		videoWatchdog.Tick += delegate
+		{
+			try
+			{
+				if (!resumed || backdropVideo == null || videoWatchdogHangs >= 3)
+				{
+					return true;
+				}
+				if (fireplace && fireExpired)
+				{
+					return true;
+				}
+				DateTime mark = DateTime.UtcNow;
+				try { backdropVideo.Play(); } catch (Exception ex) { VideoLog("watchdog play error " + ex.GetType().Name + " " + ex.Message); }
+				long ms = (long)(DateTime.UtcNow - mark).TotalMilliseconds;
+				if (ms >= 5000)
+				{
+					videoWatchdogHangs++;
+					VideoLog("watchdog play slow ms=" + ms + " hangs=" + videoWatchdogHangs);
+				}
+			}
+			catch
+			{
+			}
+			return true;
+		};
+		videoWatchdog.Start();
 	}
 
 	protected override void OnResume()
 	{
 		VideoLog("onresume start");
+		DateTime resumeMark = DateTime.UtcNow;
 		base.OnResume();
+		VideoLog("onresume t base=" + (long)(DateTime.UtcNow - resumeMark).TotalMilliseconds);
+		resumeMark = DateTime.UtcNow;
 		try { Window.Default.Raise(); Window.Default.Activate(); } catch { }
-		try { if (!(fireplace && fireExpired)) { backdropVideo?.Play(); } if (fireplace && !fireExpired) { LockDisplay(); } } catch { }
+		VideoLog("onresume t raise=" + (long)(DateTime.UtcNow - resumeMark).TotalMilliseconds);
+		resumeMark = DateTime.UtcNow;
+		try { if (!(fireplace && fireExpired)) { backdropVideo?.Play(); } } catch (Exception ex) { VideoLog("onresume play error " + ex.GetType().Name + " " + ex.Message); }
+		VideoLog("onresume t play=" + (long)(DateTime.UtcNow - resumeMark).TotalMilliseconds);
+		if (fireplace && !fireExpired)
+		{
+			LockDisplay();
+		}
+		resumeMark = DateTime.UtcNow;
 		clockTimer?.Start();
 		RefreshSource();
+		VideoLog("onresume t source=" + (long)(DateTime.UtcNow - resumeMark).TotalMilliseconds);
+		resumeMark = DateTime.UtcNow;
 		if (tabs != null && page == 2)
 		{
 			RefreshSettings();
 			UpdateFocus(animate: false);
 		}
+		VideoLog("onresume t settings=" + (long)(DateTime.UtcNow - resumeMark).TotalMilliseconds);
+		resumed = true;
 		WriteState("resumed");
 		VideoLog("onresume done");
 	}
@@ -426,6 +480,7 @@ public sealed class QuietHome : NUIApplication
 	protected override void OnPause()
 	{
 		VideoLog("onpause");
+		resumed = false;
 		base.OnPause();
 		try { backdropVideo?.Pause(); UnlockDisplay(); } catch { }
 		editing = "";

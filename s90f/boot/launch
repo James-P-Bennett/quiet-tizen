@@ -11,13 +11,9 @@ LOG=$D/runs.log
   cat "$D/original" | /bin/bash
   echo "original_rc=$?"
   /usr/bin/gdbus call --system --dest net.connman --object-path / --method net.connman.Clock.SetProperty Timeservers "<['pool.ntp.org', 'time.google.com']>" >/dev/null 2>&1 || true
-  SM=/sys/fs/smackfs/load2
-  [ -f "$SM" ] || SM=/smack/load2
-  printf '%s' 'User::Pkg::com.samsung.tv.cobalt User::Pkg::xvvl3S1TT1 rwxat' > "$SM"
-  echo "rule1_rc=$?"
-  printf '%s' 'User::Pkg::xvvl3S1TT1 User::Pkg::com.samsung.tv.cobalt rwxat' > "$SM"
-  echo "rule2_rc=$?"
-  grep -E 'User::Pkg::com.samsung.tv.cobalt User::Pkg::xvvl3S1TT1|User::Pkg::xvvl3S1TT1 User::Pkg::com.samsung.tv.cobalt' "$SM" | grep -v '::RO'
+  # Quiet memory trim: these units have no stop-file condition, so the mask
+  # has to be reapplied every boot.
+  systemctl mask --runtime --now contents-recognition-service.service org.tizen.tv.sp-kpi.service data-service.service ipa.service 2>&1 | sed 's/^/mask: /'
   echo "=== done ==="
 } >> "$LOG" 2>&1
 # Quiet remote key proxy

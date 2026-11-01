@@ -75,7 +75,7 @@ A temporary SDB/archive-launcher root session was also demonstrated on a
 Samsung `QN55S90FAFXZA`, firmware `T-RSMFAKUC-0090-1301.0` (Linux 5.4.261,
 aarch64, .NET 6.0.9). The TV authenticated the temporary agent as UID/EUID 0.
 That TV now runs a complete, verified Quiet Home setup: the launcher, an
-AT-HUB boot hook that reapplies the TizenTube SMACK rules, early Home
+AT-HUB boot hook, early Home
 activation and four remote key rebinds. A full unplug, standby wake and all
 four physical buttons were verified on 2026-10-27. Its sanitized source, boot
 payloads, deploy tools and agent handoff are in [s90f/](s90f/); start with

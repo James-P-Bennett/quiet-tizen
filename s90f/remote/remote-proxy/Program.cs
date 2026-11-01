@@ -33,7 +33,7 @@ namespace RemoteProxy
 
         private static readonly Dictionary<ushort, string> Map = new Dictionary<ushort, string>
         {
-            { KEY_YOUTUBE, "xvvl3S1TT1.TizenTubeStandalone" },
+            { KEY_YOUTUBE, "9Ur5IzDKqV.TizenYouTube" },
             { KEY_TVPLUS, "rTn6ClEurC.Jellyfin" },
         };
 
